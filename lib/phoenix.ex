@@ -75,10 +75,35 @@ defmodule Phoenix do
     Application.get_env(:phoenix, :json_library, Poison)
   end
 
-  @doc false
-  # Returns the `:init_mode` to pass to `Plug.Builder.compile/3`.
+  @doc """
+  Returns the `:init_mode` to pass to `Plug.Builder.compile/3`.
+
+  We prefer the value found in the `:plug_builder_opts` environment
+  variable, then the `:plug_builder_opts` environment variable.
+  """
   def plug_init_mode do
-    Application.get_env(:phoenix, :plug_init_mode, :compile)
+    case Application.get_env(:phoenix, :plug_builder_opts) do
+      nil ->
+        Application.get_env(:phoenix, :plug_init_mode, :compile)
+      opts ->
+        Keyword.get(opts, :init_mode, :compile)
+    end
+  end
+
+  @doc """
+  Returns the `builder_opts` options list that is used when creating
+  Plug pipelines via `Plug.Builder.compile/3`.
+
+  If the `:plug_builder_opts` environment variable does not exist, then we
+  create an options list based on `plug_init_mode()`'s value.
+  """
+  def plug_builder_opts do
+    case Application.get_env(:phoenix, :plug_builder_opts) do
+      nil ->
+        [init_mode: plug_init_mode()]
+      res ->
+        res
+    end
   end
 
   defp warn_on_missing_json_library do

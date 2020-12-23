@@ -76,8 +76,7 @@ defmodule Phoenix.Controller.Pipeline do
     action = {:action, [], true}
     plugs  = [action|Module.get_attribute(env.module, :plugs)]
     {conn, body} = Plug.Builder.compile(env, plugs,
-      log_on_halt: :debug,
-      init_mode: Phoenix.plug_init_mode())
+      Phoenix.plug_builder_opts() ++ [log_on_halt: :debug])
 
     fallback_ast =
       env.module
